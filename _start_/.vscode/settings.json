@@ -14,5 +14,6 @@
         "vector": "cpp",
         "string_view": "cpp",
         "initializer_list": "cpp"
-    }
+    },
+    "CodeGPT.apiKey": "CodeGPT Plus Beta"
 }
