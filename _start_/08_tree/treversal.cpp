@@ -66,7 +66,7 @@ void levelorder(Node* node)
 }
 
 
-// 후위 순회로 삭제함수 짜보기
+// 후위 순회로 삭제함수
 void delete_tree(Node* node)
 {
     if(node)
