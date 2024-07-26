@@ -15,7 +15,7 @@ private:
     Node* head;
 public:
     // 생성자, 소멸자
-    LinkedList() : head(NULL) {};
+    LinkedList() : head(NULL) {}; // 
     ~LinkedList()
     {
         while(!empty())

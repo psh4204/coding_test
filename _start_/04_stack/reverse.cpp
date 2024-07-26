@@ -50,7 +50,7 @@ int main(void)
     cout<< str2 << " -> " << reverse(str2) <<endl;
 
     vector<int> vec {10,20,30,40,50};
-    reverse<int>(vec);
+    reverse(vec);
 
     for(auto e: vec)
     {
