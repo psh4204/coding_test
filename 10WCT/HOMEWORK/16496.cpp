@@ -77,6 +77,10 @@ TC
 9차 제출: 틀렸습니다. (86%)
 - 그룹화, 커스텀sort 다썼는데 안된다.
 - 그렇담 최적화, 탐색 이슈는 아닐거같음.(내 머리론)
+
+1N차 제출: 틀렸습니다 (86%)
+- 앞자리 0인친구들 처리하는게 문제일 것같아서 처리함
+- 근데 왜 86에서 못올라갈까
 - 
  */
 #include <bits/stdc++.h>
@@ -84,16 +88,16 @@ using namespace std;
 
 int _N = 0;
 vector<string> _str_nums;
-// vector<vector<int>> _num_sort_groups;
-// vector<string>  _str_biggest_nums;
 
 bool custon_cmp(string first, string second)
 {
     int int_first = stoi(first);
     int int_second = stoi(second);
-    string str_first = to_string(int_first);
-    string str_second = to_string(int_second);
-    return (str_first + str_second) > (str_second + str_first);
+    if(int_first == int_second) // 앞자리가 0인 정수문자열 처리
+    {
+        return first.length() < second.length(); // 01, 001 중 length 짧은값이 앞으로감.
+    }
+    return (first + second) > (second + first); // 그외에는 string 끼리 합쳤을때 더큰값을 만드는 값이 앞으로 감.
 }
 
 void get_input_and_init_nums()
@@ -112,79 +116,25 @@ void get_input_and_init_nums()
     sort(_str_nums.begin(), _str_nums.end(), custon_cmp);
 }
 
-// void get_sort_group()
-// {
-//     if(_N < 1)
-//         exit(0);
-
-//     int num_sort_row = 0;
-//     _num_sort_groups.push_back({_str_nums[0][0],1}); // num(아스키그대로), nums_cnt.
-//     for(int nums_cnt = 1; nums_cnt < _N; nums_cnt++)
-//     {
-//         if(_num_sort_groups[num_sort_row][0] != _str_nums[nums_cnt][0])
-//         {
-//             _num_sort_groups.push_back({_str_nums[nums_cnt][0],1});
-//             num_sort_row++;
-//         }
-//         else
-//         {
-//             _num_sort_groups[num_sort_row][1]++;
-//         }
-//     }
-// }
-
-// void get_biggest_nums_from_group()
-// {
-//     int prev_group_idx = 0;
-//     for(auto group : _num_sort_groups)
-//     {
-//         string main_sum;
-//         int group_idx = group[1]; // 그룹 인덱스
-//         vector<string> group_nums(_str_nums.begin()+prev_group_idx, 
-//                                     _str_nums.begin()+prev_group_idx+group_idx); // 그룹 {34, 30, 3}
-
-//         sort(group_nums.begin(), group_nums.end(), custon_cmp); // {3, 34, 30}
-//         for(auto g_n: group_nums)
-//         {
-//             main_sum += g_n;
-//         }
-//         _str_biggest_nums.push_back(main_sum);
-//         prev_group_idx += group_idx;
-//     }
-// }
-
-// void sum_biggest_num_and_print_answer()
-// {
-//     string str_answer;
-//     for(auto biggest_num: _str_biggest_nums)
-//         str_answer += biggest_num;
-//     cout << str_answer;
-// }
-
 void sum_num_and_print_answer()
 {
     string str_answer;
-    for(auto str_num: _str_nums)
+    int int_num = stoi(_str_nums[0]);
+    str_answer += to_string(int_num);
+
+    for(int loop_cnt = 1; loop_cnt < _str_nums.size(); loop_cnt++)
     {
-        int int_num = stoi(str_num);
-        str_answer += to_string(int_num);
+        str_answer += _str_nums[loop_cnt];
     }
     cout << str_answer;
 }
 
 int main()
 {
-    // 입력 후 _str_nums init and greater sort.
+    // 입력 후 _str_nums init and greater-custom sort.
     get_input_and_init_nums();
 
-    // // 앞자리수 _nums_sort_group init
-    // get_sort_group();
-
-    // // 그룹별 sort 후 가장큰 수 만들기.
-    // get_biggest_nums_from_group();
-
     // // 값 출력
-    // sum_biggest_num_and_print_answer();
     sum_num_and_print_answer();
 
     return 0;
