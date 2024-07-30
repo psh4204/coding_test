@@ -10,47 +10,29 @@ input
 output
 - 팬린드롬이면 1, 아니면 0
 
-1차 풀이
+1차 풀이: 맞춤
 - 인풋 받아옴
 - 길이가 홀수면 중간값 삭제
 - string에서 앞과 뒤만 체크하는 루프 시작
+
+2차 풀이
+- reverse라는 함수가 있음. 
+- sort는 정렬이지만- reverse는 단순히 뒤집기함수임.
 */
 
 #include <bits/stdc++.h>
 using namespace std;
 
-
 int main()
 {
-    string str_input, front_copy, back_copy;
-    int div_front_idx, div_end_idx = 0;
+    string str_input, copy;
     cin >> str_input;
-    if(str_input.length() == 1)
-    {
-        cout << 1;
-        exit(0);
-    }
-    else if(str_input.length() %2 == 0) // input이 짝수길이인가?
-    {
-        div_front_idx = str_input.length()/2;
-        div_end_idx = div_front_idx;
-    }
+    copy = str_input;
+    reverse(copy.begin(), copy.end());
+    if(str_input == copy)
+        cout<< 1 ;
     else
-    {
-        div_front_idx = str_input.length()/2;
-        div_end_idx = div_front_idx +1;
-    }
-    front_copy = str_input.substr(0, div_front_idx);
-    back_copy = str_input.substr(div_end_idx, str_input.length());
-
-    for(int loop_idx = 0; loop_idx < front_copy.length(); loop_idx++)
-    {
-        if(front_copy[loop_idx] != back_copy[front_copy.length() -1 -loop_idx])
-        {
-            cout<< 0;
-            exit(0);
-        }
-    }
-    cout<< 1 ;
+        cout<< 0;
+    
     return 0;
 }
