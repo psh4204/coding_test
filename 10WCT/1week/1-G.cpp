@@ -25,6 +25,7 @@ input:
 using namespace std;
 
 std::string _pattern[2];
+int _N = 0;
 
 void split_pattern(string str, string delimeter)
 {
@@ -37,14 +38,38 @@ void split_pattern(string str, string delimeter)
     _pattern[1] = str;
 }
 
+void check_pattern(string user_input)
+{
+    if(user_input.length() >= _pattern[0].length() + _pattern[1].length())
+    {
+        string front_input = user_input.substr(0, _pattern[0].length());
+        string back_input = user_input.substr(user_input.length() -  _pattern[1].length(), user_input.length());
+        if(front_input == _pattern[0] && back_input == _pattern[1])
+        {
+            cout << "DA" << "\n";
+            return;
+        }
+    }
+    cout << "NE" << "\n";
+}
+
 int main()
 {
     string input;
+    vector<string> inputs;
+    cin >> _N;
     cin >> input;
-    // 패턴 가져온 후 아무것도 패턴없는거까지 
     split_pattern(input,"*");
-    if(_pattern[1].length() < 1)
+    if(_pattern[0].length() < 1)
         exit(0);
-    
+    for(int input_cnt = 0; input_cnt < _N; input_cnt++)
+    {
+        cin >> input;
+        inputs.push_back(input);
+    }
+    for(auto str_i : inputs)
+    {
+        check_pattern(str_i);
+    }
     return 0;
 }
