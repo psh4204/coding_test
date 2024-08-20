@@ -61,112 +61,59 @@ Try3~5.
 - 트리니까 루트노드로 부터 dfs도 하고, 예외처리 다한거같은데 왜틀릴까?\
 - 너무 답답해서 TC 란 TC도 다 해봤는데 다 맞다뜸. 또 이러네 진짜.. 
 
-Try6. with hint
-- "이진트리"라는 말을 한적이 없다.
-- 그랬다한들 더 심플한 방법이 있는데, 인접리스트를 통한 구현.
-    - TODO: 
+==========================
+Try n.
+- 각 노드의 부모노드를 입력값으로 준다했음.
+- 인접행렬로 트리를 구성해보자.
 
 */
 #include <bits/stdc++.h>
 using namespace std;
-int _N = 0; // node 개수
-int _D = 0; // 지울 노드
-int ret = 0;
+int _N, _D, _l_cnt;
+vector<vector<int>> _tree(50);  // _N의 개수는 1~50
+int _root_idx = 0; // 루트노드
 
-typedef struct n_t
-{
-    n_t* p  = nullptr;      // 부모
-    n_t* l_c = nullptr;     // 왼-자
-    n_t* r_c = nullptr;     // 오-자
-    int data = -1;          // data 확인용
-
-    void insert(n_t* n)
-    {
-        if(l_c == nullptr)  l_c = n;
-        else                r_c = n;
-    }
-
-    void pop(void)
-    {
-        l_c = nullptr;
-        r_c = nullptr;
-        if(p != nullptr)
-        {
-            if(p->l_c != nullptr && p->l_c->data == data)
-                p->l_c = nullptr;
-            if(p->r_c != nullptr && p->r_c->data == data)
-                p->r_c = nullptr;
-        }
-        data = -1;
-    }
-}node_t;
-
-// TODO: Delete Test Code
-void print_node(node_t* node)
-{
-    if(node->data != -1 && node->l_c == nullptr && node->r_c == nullptr)
-    {
-        cout << node->data << "//";
-        return;
-    }
-    cout << node->data << "->";
-    if(node->l_c != nullptr)  print_node(node->l_c);
-    if(node->r_c != nullptr)  print_node(node->r_c);
-}
-
-int count_leaf(node_t* node)
+int count_leafs(int here)
 {
     int ret = 0;
-    if(node->data != -1 && node->l_c == nullptr && node->r_c == nullptr)
+    if(_tree[here].size() == 0) return 1;
+    for(int c_idx = 0; c_idx < _tree[here].size(); c_idx++)
     {
-        return 1;
+        ret += count_leafs(_tree[here][c_idx]);
     }
-    if(node->l_c != nullptr)  ret += count_leaf(node->l_c);
-    if(node->r_c != nullptr)  ret += count_leaf(node->r_c);
+
     return ret;
 }
 
 int main()
 {
+    // Init tree
     cin >> _N;
-    vector<int> p_lst;  // parent list
-    for(int in_cnt = 0; in_cnt < _N; in_cnt++)
+    for(int n_idx = 0; n_idx < _N; n_idx++)
     {
-        p_lst.push_back({});
-        cin >> p_lst[in_cnt];
+        int parent = 0;
+        cin >> parent;
+        if(parent == -1) _root_idx = n_idx;
+        else    _tree[parent].push_back(n_idx);     // 부모노드에 자식데이터 삽입
     }
-    sort(p_lst.begin(), p_lst.end()); // 부모 오름차순 sort: node list를 쉽게 짜기위해
-    
-    // 노드리스트 init
-    vector<node_t> n_lst(_N);
-    if(p_lst.size() > 1) n_lst[0].data = p_lst[1];   // head 가 0이 아닐수 있음.
-    else  n_lst[0].data = 0;
-    for(int n_idx = 1; n_idx < _N; n_idx++)
-    {
-        int here_idx = n_lst[0].data + n_idx;
-        for(auto& n: n_lst)
-        {
-            if(n.data == p_lst[n_idx])
-            {
-                n.insert(&n_lst[n_idx]);  // 현재 노드를 부모노드에 insert(왼/오 구분)
-                n_lst[n_idx].p = &n;
-                n_lst[n_idx].data = here_idx;
-                break;
-            }
-        }
-    }
-
-    // 노드 삭제
+    // Delete node
     cin >> _D;
-    for(auto& n: n_lst)
+    _tree[_D].clear();
+    for(auto& node: _tree)
     {
-        if(n.data == _D)
+        if(node.size() == 0)    continue;
+        for(int c_idx = 0; c_idx < node.size(); c_idx++)
         {
-            n.pop();
-            break;
+            if(node[c_idx] == _D) node.erase(node.begin() + c_idx);
         }
     }
-
-    cout << count_leaf(&n_lst[0]);
+    // Count leaf with dfs
+    if(_D == _root_idx)
+        _l_cnt = 0;
+    else if(_tree[_root_idx].size() == 0)
+        _l_cnt = 1;
+    else
+        _l_cnt = count_leafs(_root_idx);
+    cout << _l_cnt;
     return 0;
 }
