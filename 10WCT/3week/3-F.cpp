@@ -24,76 +24,77 @@ Try2.
 - 순열써서 풀었는데, 이걸로 하면 중첩괄호가 되어버림..
     - 괄호친구들을 계산한 후에는 왼쪽에서 부터 차례로 계산되야함
     - 단순 순열로는 하면안되겠네 또
-- 또 조합으로 풀어야하네..
-    - 조합으로 하나하나 괄호친 후에 왼쪽에서부터 계산. 이런식으로 ㅇㅇ.
-- TODO:
-- 
+- 조합문제..다. (괄호계산 차레로한 후 나머지 계산)
+- 연산 인덱스를 하나 하나 넣고 빼고를 반복한다.
+    - 괄호 인덱스와 우선순위는 덱으로 해결하면 되겠다.
+... 괄호계산부터 경우의수 까지 전부 하드코딩했다.. 하ㅏ아.. 진짜 개힘드네
+- 난제: 저걸 어떻게 누적합으로 할수있지? 뭐지???
+--- 틀림(88%)
+
+Try3. Hint
+- 내가하던방향은 맞음
+    - DFS를 통한 완탐.
+- 다른게있다면
+    - 부호와 숫자를 완-전 분리
+        - 이걸 기반으로 코드작성
+        ==> 경우의수 최소화
+    - 이걸로 누적합해서 풂.
+        - 어케가능하냐: 중첩괄호문제가 아니고 = 일반적인 순열문제가 아니라, 숫자합의 순열느낌이랄까. 그래서 누적합 가능.
+        ==> DFS를통한 완탐으로 일단 모든 경우의수 탐색가능
+            - 여기서 계산 리턴값도 그 경우의 수에 맞게 더해짐.
+            - 그리하여 인덱스와 누적합으로 완탐가능
+            - 현재 계산한거 뒤에 또 뒤에 계산할것들이 있으면 또 계산하면 됨.(예외처리)
+- 사실 좀 이해가안됨. TODO: 다시 보자.
 */
 #include <bits/stdc++.h>
+#define MIN -1000000000000
 using namespace std;
-int _N, _max = 0;
-vector<char>    _math;    // 유저의 수식
-vector<int>     _opers;    // 연산인덱스 배열
+int _N;
+long long _max = MIN;
+vector<int> _nums;    
+vector<char> _opers;
 
-int calc();
+long long calc(char op, long long first, long long second)
+{
+    switch(op)
+    {
+        case '+':
+            return first + second;
+        case '-':
+            return first - second;
+        case '*':
+            return first * second;
+    }
+    return 0;
+}
+
+void get_max(int here, long long pre_result)
+{
+    if(here == _nums.size()-1)
+    {
+        if(pre_result > _max)  _max = pre_result;
+        return;
+    }
+    get_max(here+1, calc(_opers[here], pre_result, _nums[here+1])); // (A B) C ...
+    if(here + 2 < _nums.size()) // (A B) (C D)    ...
+    {
+        long long next_res = calc(_opers[here+1], _nums[here+1], _nums[here+2]);
+        get_max(here+2, calc(_opers[here],pre_result, next_res));
+    }
+}
 
 int main()
 {
     ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
     string input;
     cin >> _N >> input;
-    for(int in = 0; in <_N; in++)
+    for(int in_idx = 0; in_idx < _N; in_idx++)
     {
-        _math.push_back(input[in]);
-        if(_math[in] < '0' || _math[in] >'9')
-            _opers.push_back(in);
+        if(input[in_idx] >= '0' && input[in_idx] <= '9')
+            _nums.push_back(input[in_idx]-'0');
+        else
+            _opers.push_back(input[in_idx]);
     }
-
-    do
-    {
-        int num = calc();
-        if(num > _max || _max == 0)  _max = num;
-    } while (next_permutation(_opers.begin(), _opers.end()));
+    get_max(0, _nums[0]);   // 0번부터 완탐시작
     cout << _max;
-
-    return 0;
-}
-
-int calc()
-{
-    vector<int> v(_N);
-    stack<int> c_stack;
-    for(auto oper_idx: _opers)
-    {
-        int l_idx = oper_idx -1;
-        int r_idx = oper_idx +1;
-        if(l_idx >= 0 && v[l_idx] == 0)
-        {
-            c_stack.push((_math[l_idx])-'0');
-            v[l_idx] = 1;
-        }
-        if(r_idx < _N && v[r_idx] == 0)
-        {
-            c_stack.push((_math[r_idx])-'0');
-            v[r_idx] = 1;
-        }
-        // operation
-        int pre_top = c_stack.top(); c_stack.pop();
-        switch(_math[oper_idx])
-        {
-            case '+':
-            c_stack.top() += pre_top;
-            break;
-            
-            case '-':
-            c_stack.top() -= pre_top;
-            break;
-            
-            case '*':
-            c_stack.top() *= pre_top;
-            break;
-        }
-        v[oper_idx] = 1;
-    }
-    return c_stack.top();
 }
