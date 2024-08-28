@@ -38,13 +38,13 @@ Try3. Hint
     - 부호와 숫자를 완-전 분리
         - 이걸 기반으로 코드작성
         ==> 경우의수 최소화
-    - 이걸로 누적합해서 풂.
-        - 어케가능하냐: 중첩괄호문제가 아니고 = 일반적인 순열문제가 아니라, 숫자합의 순열느낌이랄까. 그래서 누적합 가능.
-        ==> DFS를통한 완탐으로 일단 모든 경우의수 탐색가능
-            - 여기서 계산 리턴값도 그 경우의 수에 맞게 더해짐.
-            - 그리하여 인덱스와 누적합으로 완탐가능
-            - 현재 계산한거 뒤에 또 뒤에 계산할것들이 있으면 또 계산하면 됨.(예외처리)
-- 사실 좀 이해가안됨. TODO: 다시 보자.
+
+- 이 문제는 DFS를 통한 완탐 + 누적합 문제이다.
+- 중첩괄호 없이 우선순위를 누구에게 주느냐 이슈인데 이는 DFS를 통한 완탐으로 충분히 해결가능
+- 무조건 왼족에서 오른쪽 계산이기 때문에 누적합으로 진행 가능
+	- (A . B) . C
+- 그럼 괄호가 뒤에 있다면?
+	- A . (B . C) 를 계산해서  DFS.
 */
 #include <bits/stdc++.h>
 #define MIN -1000000000000
@@ -76,7 +76,7 @@ void get_max(int here, long long pre_result)
         return;
     }
     get_max(here+1, calc(_opers[here], pre_result, _nums[here+1])); // (A B) C ...
-    if(here + 2 < _nums.size()) // (A B) (C D)    ...
+    if(here + 2 < _nums.size()) // A (B C)    ...
     {
         long long next_res = calc(_opers[here+1], _nums[here+1], _nums[here+2]);
         get_max(here+2, calc(_opers[here],pre_result, next_res));
