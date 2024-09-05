@@ -21,7 +21,11 @@ Try1
 Try2
 - 시간초과됐음.
 - 멀 줄여야할까..
-- 다시 풀자
+    - 플루드필을 활용한 MeltIce 담기로 얼음쪽 최적화 하자.
+
+Try3
+- 47퍼 틀림..!
+- 반례: 백조가 떠있는곳은 어디 ---> 물
 */
 #include <bits/stdc++.h>
 using namespace std;
@@ -30,7 +34,6 @@ vector<vector<int>> _lake;
 queue<pair<int,int>> _ices;
 vector<pair<int,int>> _birds;
 queue<pair<int,int>> _q;
-vector<vector<int>> _v; // vistied 녹인물. days가 들어간다.
 int _dy[4] = {-1, 0, 1, 0};
 int _dx[4] = {0, 1, 0, -1};
 
@@ -49,7 +52,6 @@ int main()
     ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
     cin >> _R >> _C;
     _lake.resize(_R,vector<int>(_C));
-    _v.resize(_R,vector<int>(_C));
     string in_str;
     getline(cin, in_str);
     for(int r = 0 ; r < _R; r++)
@@ -83,7 +85,7 @@ int main()
     do
     {
         // 백조찾기삼만리~를 하되, 오도가도못하는 가상의백조는 큐에 따로 넣어준다.
-        // 이미 방문한 물은 3으로 표시
+        // 이미 방문한 물은 E으로 표시
         vector<pair<int,int>> no_find_list;
         do
         {
@@ -107,17 +109,16 @@ int main()
                 no_find_list.push_back(here);
         } while (!_q.empty());
 
-        // [[TEST CODE]]
-        cout << "\n" << _days << "\n";
-        for(int y = 0 ; y < _R; y++)
-        {
-            for(int x = 0; x <_C; x++)
-                cout << _lake[y][x];
-            cout << "\n";
-        }
+        // // [[TEST CODE]]
+        // cout << "\n" << _days << "\n";
+        // for(int y = 0 ; y < _R; y++)
+        // {
+        //     for(int x = 0; x <_C; x++)
+        //         cout << _lake[y][x];
+        //     cout << "\n";
+        // }
 
-        if(no_find_list.empty() 
-            || _lake[_birds[1].first][_birds[1].second] == CHKED_BIRD) 
+        if(_lake[_birds[1].first][_birds[1].second] == CHKED_BIRD) 
             break; //얼음 다녹았을때 혹은 백조를 찾았을때
 
         for(auto no_find: no_find_list) _q.push(no_find);
@@ -129,23 +130,34 @@ int main()
         for(int i_idx = 0; i_idx < ice_size; i_idx++)
         {
             pair<int,int> here_ice = _ices.front(); _ices.pop();
-            _v[here_ice.first][here_ice.second] = _days;
             for(int d = 0; d < 4; d++)
             {
                 int ny = here_ice.first + _dy[d]; 
                 int nx = here_ice.second + _dx[d];
                 if(ny < 0 || nx < 0 || ny >=_R || nx >=_C)  continue;
-                if(_lake[ny][nx] == WATER || _lake[ny][nx] == CHKED_WATER)
+                if((_lake[here_ice.first][here_ice.second] == WATER 
+                    || _lake[here_ice.first][here_ice.second] == CHKED_WATER
+                    || _lake[here_ice.first][here_ice.second] == BIRD)
+                    && _lake[ny][nx] == ICE)
+                {
+                    _lake[ny][nx] = MELT_ICE;
+                    melt_ices.push_back({ny, nx});
+                }
+                else if((_lake[here_ice.first][here_ice.second] == ICE ) &&
+                    (_lake[ny][nx] == WATER || _lake[ny][nx] == CHKED_WATER
+                    ||_lake[ny][nx] == BIRD))
                 {
                     _lake[here_ice.first][here_ice.second] = MELT_ICE;
                     melt_ices.push_back(here_ice);
                     break;
                 }
-                else if()
             }
         }
         for(auto melt: melt_ices)
+        {
             _lake[melt.first][melt.second] = 0;
+            _ices.push(melt);
+        }
     } while (_lake[_birds[1].first][_birds[1].second] != CHKED_BIRD);
 
     cout << _days;
