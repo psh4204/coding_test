@@ -25,7 +25,7 @@ Hint
 - 전형적인 어려운문제. 로직만으로 풀수없음
 - 뒤집어도 되는 값인지 아닌지 부터 체크를 한 후에 뒤집어야함.
 */
-#include <bits/stdc++.h>
+#include <bits/stdc++.h>(t)
 using namespace std;
 int _N, _lines, _ret_sum;
 vector<vector<int>> _coins;
