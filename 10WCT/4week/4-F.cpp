@@ -26,28 +26,33 @@ Try N
 - 다시 풀자...
 
 Memo: TC는 모든 파라미터의 최대 최소를 대입하면 다 나옴. 다예상해봐야함.
+
+- 뭐때문에 틀렸는가?
+    - 무식하더라도 모든 인덱스(26)개를 전부 insert 해서 풀면됐었음
+    - 자신없으면 무식하게 풀자. 시간초과 나면 그때 줄이자.
+    - 계속 어딘가 틀리면, 로직중에서 하나정도는 무식하게 풀어도 됨.
 */
 #include <bits/stdc++.h>
 using namespace std;
-int _N, _K, _ret, _be_known;
-vector<int> _k_list;
+int _N, _K, _ret = 0, _be_known;
 vector<int> _in_list;
+int _antic = (1<<('a'-'a')) 
+            | (1<<('t'-'a')) 
+            | (1<<('t'-'a')) 
+            | (1<<('i'-'a')) 
+            | (1<<('c'-'a'));
 
-inline void get_ret(int here, int k_cnt, int pre_known)
+inline void get_ret(int here, int k_cnt, int known)
 {
-    if(here > _k_list.size()) return;
-    if((k_cnt == _K || k_cnt == _k_list.size())
-        && (pre_known & 1<<('a'-'a')) 
-        && (pre_known & 1<<('n'-'a')) 
-        && (pre_known & 1<<('t'-'a')) 
-        && (pre_known & 1<<('i'-'a'))
-        && (pre_known & 1<<('c'-'a')))
+    if(here > 26) return;
+    if((k_cnt == _K)&& 
+        ((known & _antic) == _antic))
     {
         int can_read_cnt = 0;
         //  읽어내는지 체크
         for(auto in: _in_list)
         {
-            if((in&pre_known) == in)
+            if((in & known) == in)
                 can_read_cnt++;
         }
         // // [[TESTCODE]]
@@ -56,10 +61,8 @@ inline void get_ret(int here, int k_cnt, int pre_known)
         _ret = max(_ret, can_read_cnt);
         return;
     }
-
-    int known = pre_known | (1<<_k_list[here]);
-    get_ret(here+1, k_cnt+1, known);
-    get_ret(here+1, k_cnt, pre_known);
+    get_ret(here+1, k_cnt+1, known | (_be_known & (1<<here)));
+    get_ret(here+1, k_cnt, known);
 }
 
 int main()
@@ -75,13 +78,10 @@ int main()
         {
             int val = str_input[cnt] - 'a';
             input |= (1<<val);
-            if(_be_known & (1<<val)) continue;
             _be_known |= (1<<val);
-            _k_list.push_back(val);
         }
         _in_list.push_back(input);
     }
-    
     if(_K < 5) // "antic"글자수보다 못읽겠다하면 종료 // <-  이거 빼면 14% 넣으면 66% 정답. 완탐을 잘못하고있는것으로 판단됨.
     {
         cout << 0;
