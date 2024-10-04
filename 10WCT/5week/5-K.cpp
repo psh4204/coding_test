@@ -32,17 +32,59 @@ Try1
     - 루프문으로 먼지배포. 이전의 지도에서 새 지도를 만드는 형식으로 해야할듯
     - 공기청정기 움직임
 - 구현 후에 최적화 하는 방식으로 가자.
+
+Try2
+- 세부 구현에서 틀린듯
+회전체크용
+8 8 2
+7 6 5 4 3 2 1 0
+8 0 0 0 0 0 0 9
+9 0 0 0 3 0 0 8
+-1 1 2 3 4 5 6 7
+-1 1 2 3 4 5 6 7
+9 0 0 0 0 10 43 8
+8 0 5 0 15 0 0 9
+7 6 5 4 3 2 1 0
+
+https://www.acmicpc.net/board/view/66441
+반례1: 답 191 (잡음)
+8 8 2
+3 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 9
+0 0 0 0 3 0 0 8
+-1 0 5 0 0 0 22 0
+-1 8 0 0 0 0 0 0
+0 0 0 0 0 10 43 0
+0 0 5 0 15 0 0 0
+0 0 40 0 0 0 20 0
+
+공기청정기 위치가 (n,0) 아무데나 있을 때.
+반례2: 답 68
+4 6 4
+0 0 9 8 7 6
+-1 1 2 3 4 5
+-1 1 2 3 4 5
+1 0 9 8 7 6
+
+반례3: 답 64
+4 6 4
+-1 1 2 3 4 5
+-1 1 2 3 4 5
+4 0 0 0 0 6
+3 2 1 0 8 7
+
+
 */
 #include <bits/stdc++.h>
 using namespace std;
-int _R, _C, _T;
+int _R, _C, _T, _ret;
 vector<vector<int>> _room;
 vector<pair<int,int>> _cleaner;
 
 int _dy[4] = {-1, 0 ,1, 0};
 int _dx[4] = {0, 1, 0, -1};
 
-vector<vector<int>> process_dust(vector<vector<int>> &pre_room)
+inline vector<vector<int>> process_dust(vector<vector<int>> &pre_room)
 {
     vector<vector<int>> now_room(_R,vector<int>(_C));
     for(int r = 0; r < _R; r++)
@@ -53,7 +95,7 @@ vector<vector<int>> process_dust(vector<vector<int>> &pre_room)
             else if(pre_room[r][c] == -1)
             {
                 now_room[r][c] = -1;
-                break;
+                continue;
             }
             int dust = pre_room[r][c];
             int dust_cnt = 0;
@@ -61,82 +103,58 @@ vector<vector<int>> process_dust(vector<vector<int>> &pre_room)
             {
                 int ny = _dy[d_idx] + r;
                 int nx = _dx[d_idx] + c;
-                if(ny < 0 || nx < 0 || ny >= _R || nx >= _C || pre_room[ny][nx] == -1 || pre_room[ny][nx] == -1)
+                if(ny < 0 || nx < 0 || ny >= _R || nx >= _C || pre_room[ny][nx] == -1)
                     continue;
                 dust_cnt++;
                 now_room[ny][nx] += (int)(dust/5);
             }
-            now_room[r][c] += dust - (int)(dust/5)*dust_cnt;
+            now_room[r][c] += (dust -((int)(dust/5)*dust_cnt));
         }
     }
 
     return now_room;
 }
 
-vector<vector<int>> process_cleaner(vector<vector<int>> &pre_room)
+inline vector<vector<int>> process_cleaner(vector<vector<int>> &pre_room)
 {
+    // room copy
     vector<vector<int>> now_room(pre_room);
     // Cleaner 0 -->
-    // TODO: 순환 코드 다시짜라.
-    now_room[_cleaner[0].first][_cleaner[0].second] = 0;
-    for(int x = 1; x < _C; x++)
-    {
-        int nx = x + 1;
-        if(nx == _C)
-        {
-            now_room[_cleaner[0].first-1][_C-1] = pre_room[_cleaner[0].first][_C-1];
-            break;
-        }
-        now_room[_cleaner[0].first][x] = now_room[_cleaner[0].first][x-1];
-        now_room[_cleaner[0].first][nx] = pre_room[_cleaner[0].first][x];
-    }
+    pre_room[_cleaner[0].first][_cleaner[0].second] =0; 
+    for(int nx = 1; nx < _C; nx++) // (y,x+1)
+        now_room[_cleaner[0].first][nx] = pre_room[_cleaner[0].first][nx-1];
     // Cleaner 0 UP
-    for(int y = _cleaner[0].first -2; y >=0; y--)
-    {
-        int ny = y - 1;
-        if(ny == -1)
-        {
-            now_room[0][_C-2] = pre_room[0][_C-1];
-            break;
-        }
-        now_room[y][_C-1] = now_room[y+1][_C-1];
-        now_room[ny][_C-1] = pre_room[y][_C-1];
-    }
+    for(int ny = _cleaner[0].first -1; ny >=0; ny--) //(y-1,_C-1)
+        now_room[ny][_C-1] = pre_room[ny+1][_C-1];
     // Cleaner 0 <--
-    for(int x = _C-2; x >= 0; x--)
-    {
-        int nx = x - 1;
-        if(nx == -1)
-        {
-            now_room[1][0] = pre_room[0][0];
-            break;
-        }
-        now_room[_cleaner[0].first][x] = now_room[_cleaner[0].first][x+1];
-        now_room[_cleaner[0].first][nx] = pre_room[_cleaner[0].first][x];
-    }
+    for(int nx = _C-2; nx >= 0; nx--) // (0, C-2)
+        now_room[0][nx] = pre_room[0][nx+1];
     // Cleaner 0 Down
-    for(int y = 1; y  < _cleaner[0].first; y++)
-    {
-        int ny = y + 1;
-        now_room[y][0] = now_room[y-1][0];
-        if(ny == _cleaner[0].first)
-        {
-            break;
-        }
-        now_room[ny][0] = pre_room[y][0];
-    }
+    for(int ny = 1; ny <_cleaner[0].first; ny++) // (1, 0)
+        now_room[ny][0] = pre_room[ny-1][0];
+    now_room[_cleaner[0].first][0] = -1;
 
     // Cleaner 1 -->
-    // Cleaner 0 Down
-    // Cleaner 0 <--
-    // Cleaner 0 Up
-    
+    pre_room[_cleaner[1].first][_cleaner[1].second] =0;
+    for(int nx = 1; nx < _C; nx++) // (y,x+1)
+        now_room[_cleaner[1].first][nx] = pre_room[_cleaner[1].first][nx-1];
+    // Cleaner 1 Down
+    for(int ny = _cleaner[1].first+1; ny <=_R-1; ny++) // (y+1,_C-1)
+        now_room[ny][_C-1] = pre_room[ny-1][_C-1];
+    // Cleaner 1 <--
+    for(int nx = _C-2; nx >= 0; nx--) // (_R-1, _C-2)
+        now_room[_R-1][nx] = pre_room[_R-1][nx+1];
+    // Cleaner 1 Up
+    for(int ny = _R-2; ny >_cleaner[1].first; ny--) // (_R-2, 0)
+        now_room[ny][0] = pre_room[ny+1][0];
+    now_room[_cleaner[1].first][0] = -1;
 
     return now_room;
 }
 
 int main()
 {
+    ios_base::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL);
     cin >> _R >> _C >> _T;
     _room.resize(_R, vector<int>(_C));
     for(int r = 0; r <_R; r++)
@@ -150,17 +168,28 @@ int main()
     }
     for(int t_cnt = 0; t_cnt < _T; t_cnt++)
     {
-        // _room = process_dust(_room);
+        _room = process_dust(_room);
         _room = process_cleaner(_room);
 
-        //[[TESTCODE]]
-        cout << "\n [ " << t_cnt << " ]\n";
-        for(auto r: _room)
+        // //[[TESTCODE]]
+        // cout << "\n [ " << t_cnt << " ]\n";
+        // for(auto r: _room)
+        // {
+        //     for(auto c: r)
+        //         cout << c << " ";
+        //     cout << "\n";
+        // }
+    }
+    for(int y =0 ; y < _R; y++)
+    {
+        for(int x = 0; x < _C; x++)
         {
-            for(auto c: r)
-                cout << c << " ";
-            cout << "\n";
+            if((_cleaner[0].first == y && _cleaner[0].second == x)
+                || (_cleaner[1].first == y && _cleaner[1].second == x))
+                continue;
+            _ret+=_room[y][x];
         }
     }
+    cout << _ret;
     return 0;
 }
