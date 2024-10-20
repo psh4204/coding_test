@@ -13,20 +13,49 @@
 - 자두를 받을 수 있는 최대개수 출력
 
 도전1
-- 배열 두개로 나무지도 만들기
-- 자두체력으로 각 움직인것에 대한 완전탐색 필요 (0~30).. 2^31 ㄷㄷ
-- 자두가 움직인 횟수 중에서 가장 큰거를 가져오면 되겠네
-- dp로 vistied 배열 만들어서 찾아보자
-    - 방문은 자두떨어지는 타이밍(T ~10000), 사람움직임(M 0~1), 사람체력 (W 0~30)
+- T, W 받은 후, W를 사용할 수있는 경우의수 = 2^30
+- 해당 경우에서 나온 값을 최적해를 구한 후 dp에 메모.
+    - 특정 Tn W0 cntn 의 경우를 전부 안할 수 있음 (최적화)
+- 최적해 고우고우
 */
 #include <bits/stdc++.h>
 using namespace std;
+#define TRASH -1e9
+#define MAX_T 1004
+#define MAX_W 34
+vector<vector<vector<int>>> _dp(MAX_T,vector<vector<int>>(MAX_W,vector<int>(2,-1)));
+vector<int> _jadoos(MAX_T,-1);
+int _T, _W;
 
-int _N;
+inline int get_jadoo(int here, int hp, int move)
+{
+    // 기저
+    if(hp < 0)  return TRASH;
+    if(here > _T)  return 0;
 
+    // 메모
+    int &ret = _dp[here][hp][move]; 
+    if(~ret)    return ret;
+    
+    // 로직
+    ret = max(get_jadoo(here+1, hp, move), get_jadoo(here+1, hp-1, move^1)) + (_jadoos[here] == move);
+    
+    // // [[TEST]]
+    // cout<< here << " " << move << " " << ret << "\n";
+    return ret;
+}
 
 int main()
 {
+    cin >> _T >> _W;
+    for(int j_idx = 1; j_idx <= _T; j_idx++)
+    {
+        int jadoo = 0;
+        cin >> jadoo;
+        _jadoos[j_idx] = jadoo -1;
+    }
+    // 초기화
+    cout << get_jadoo(0,_W,0);
 
     return 0;
 }
