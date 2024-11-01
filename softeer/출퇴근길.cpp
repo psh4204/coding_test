@@ -14,11 +14,12 @@
 - 출근, 퇴근길 루트에서 전부 겹치는 Vertex 수 를 구하시오.
 
 풀이
-- 입력값을 통한 인접리스트로 구현해야할 듯
-- S에서 T로 간 후, T에서 S로 다시가야함.
-    - 이동시 visited를 쓰는데, cnt를 플래그로 넣자. 현재 cnt보다 크면 안가는걸로.
-- dfs로 경로탐색 완료 후, 각 경로 별 Vertex카운트 배열에서 카운트.
-- S접점의 카운트수와 동일한 Vertex를 추려서 Ret Count.(T까지 카운트한것을 지우기위한 -1하기)
+- 인접리스트가 총 두개 필요함 (정방향, 반대방향)
+    - S, T를 제외한 모든 노드를 전부 탐색할 수 있음(중복가능)
+    - 주의 사항은 '완탐'을 해야함. 최소경로 문제가 아님. 전부다 돌고난 후에 방문체크를 해야함. (양방향간선이 있기때문)
+- S -> T의 trace, S -> T이지만 반대 trace/ T-> S의 trace, T->S이지만 반대
+- DFS혹은 BFS로 풀이가능
+- 탐색 4번 돌리고, 이와 겹치는 경로만 카운트하면 정답
 
 // TC
 5 9
@@ -49,104 +50,55 @@
 7 6
 8 7
 6 5
-
-// TODO.. 시간초과 + 오답율 99. ㅠㅠㅠ 머야 이게 ;;
 */
 #include <bits/stdc++.h>
+#define MAX_NODE 100002
 using namespace std;
-enum go_mode{
-    GO_WORK = 1,
-    GO_WORK_2,
-    GO_HOME,
-    GO_HOME_2,
-};
-unordered_set<int> _adj[100001];
-vector<int> _history;         // trace를 위해 Stack like로 사용. 
-vector<int> _visited(100001); // 중복추가 방지용 방문처리.
-vector<int> _route_cnt(100001);
-int _N, _M, _S, _T, _ret_cnt = 0;
+int _n, _m, _s, _t, _ret_cnt = 0;
+vector<vector<int>> _adj(MAX_NODE); // 단방향 체크용
+vector<vector<int>> _r_adj(MAX_NODE); // 양방향 체크용
+vector<vector<int>> _traces(4,vector<int>(MAX_NODE));
 
-inline void check_route(int here, go_mode mode)
+inline void go_target_out(int here, vector<vector<int>> & adj ,vector<int>&trace)
 {
-    if(here == _T && mode == GO_WORK)
-    {
-        mode = GO_HOME;   
-    }
-    else if(here == _S && mode == GO_HOME)
-    {
-        // // [[TEST CODE]]
-        // for(auto hist: _history)
-        //     cout << hist << ", ";
-        // cout << "\n";
-
-        set<int> hist_copy;
-        for(auto v : _history)
-        {
-            if(!hist_copy.empty() && hist_copy.find(v) != hist_copy.end())
-            {
-                // cout << v << "(o) "; // [[TEST CODE]]
-                _route_cnt[v] = 1;
-                continue;
-            }
-            hist_copy.insert(v);
-        }
-        // cout << "\n"; // [[TEST CODE]]
-        
+    if(trace[here] == 1)
         return;
-    }
-    for(auto next: _adj[here])
-    {
-        int prev_flag = _visited[next];
-        if((mode == GO_WORK &&  (next == _S || _visited[next] == GO_WORK_2))
-            || (mode == GO_HOME && (next == _T || _visited[next] == GO_HOME_2)))
-        {
-            continue;
-        }
-        if((mode == GO_WORK &&  (next == _S || _visited[next] == GO_WORK))
-            || (mode == GO_HOME && (next == _T || _visited[next] == GO_HOME)))
-        {
-            if(_adj[here].find(next) != _adj[here].end())
-            {
-                _visited[next] = mode+1;
-            }
-            else
-                continue;
-        }
-        else
-            _visited[next] = mode;
-        
-        _history.push_back(next);
-        check_route(next, mode);
-        _history.pop_back();
-        _visited[next] = prev_flag;
-    }
+    trace[here] = 1;
+    // cout << here << " ";  //TEST
+    for(int t_cnt = 0; t_cnt < adj[here].size(); t_cnt++)
+        go_target_out(adj[here][t_cnt], adj ,trace);
 }
 
 int main(int argc, char** argv)
 {
-    ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
-    cin >> _N >> _M;
-    for(int m_cnt = 0; m_cnt < _M; m_cnt++)
+    cin >> _n >> _m;
+    for(int m_cnt = 0 ; m_cnt < _m; m_cnt++)
     {
-        int start, end;
-        cin >> start >> end;
-        _adj[start].insert(end);
+        int y, x;
+        cin >> y >> x;
+        _adj[y].push_back(x);
+        _r_adj[x].push_back(y);
     }
-    cin >> _S >> _T;
+    cin >> _s >> _t;
 
-    _history.push_back(_S);
-    _visited[_S] = GO_WORK;
-    check_route(_S, GO_WORK);
-    if(_route_cnt[_S] == 0)
+    // cout << "\n(" <<  1 << ")\n";  //TEST
+    _traces[0][_t] =1;
+    go_target_out(_s, _adj ,_traces[0]);
+    // cout << "\n(" <<  2 << ")\n";  //TEST
+    // _traces[1][_t] =1; // 반대방향은 이게 전체를 돌까? 를 보는거기 때문에 플래그설정 안해도됨.
+    go_target_out(_s, _r_adj ,_traces[1]);
+    // cout << "\n(" <<  3 << ")\n";  //TEST
+    _traces[2][_s] =1;
+    go_target_out(_t, _adj ,_traces[2]);
+    // cout << "\n(" <<  4 << ")\n";  //TEST
+    // _traces[3][_s] =1;
+    go_target_out(_t, _r_adj ,_traces[3]);
+    // cout << "\n(" <<  "end" << ")\n";  //TEST
+    for(int node_idx = 0; node_idx < MAX_NODE; node_idx++)
     {
-        cout << 0 << "\n";
-        return 0;
-    }
-    for(auto v_value: _route_cnt)
-    {
-        if(v_value != 0)
+        if(_traces[0][node_idx] && _traces[1][node_idx] &&_traces[2][node_idx] &&_traces[3][node_idx])
             _ret_cnt++;
     }
-    cout << _ret_cnt-1 << "\n";
+    cout << _ret_cnt-2;
     return 0;
 }
