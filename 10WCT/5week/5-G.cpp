@@ -9,58 +9,56 @@
 출력
 - 카운트
 
-풀이
-- 소수의 특성. 그 어느 수에도 나눠지지 않음.
-- 나눠지지 않는 수를 쌓은 후, 그 수의 합이 주어진 자연수와 일치하는지 체크
-- 소수집합을 만들어야함.
-    - 2로 시작해서, 다음 값에 +1 혹은 *2 씩 한후, 집합의 값과 안나눠지는 수를 쌓는다.
-    - 동시에 합을 체크한다.
-    - 어차피 빅오가 팩토리얼이라고 쳐도, 2~11 사이 선으로 수가 마무리 될거임.
-
-// 다시풀기 (소수 구한 후 그리드로 푸는 문제임.)
-
+다시 풀기
+- 소수구하기(에라토스체네스의 해)
+- 소수들로 각 연속된 합을 구한뒤, 합이 나오면 PASS, 아니면 FAIL
+- 해당 PASS카운트를 정답카운트에 ++;
 */
 #include <bits/stdc++.h>
+#define MAX_N 4000000
 using namespace std;
-struct num_t{
-    int n;
-    int sum_n;
-};
-int _N;
-vector<num_t> _nums;
+int _N, _ret_cnt;
+vector<int> _snums;
+inline bool is_snum(int num)
+{
+    if(num == 1) return false;
+    else if(num == 2) return true;
+    else if(num%2 == 0) return false;
+    for(int i = 3; i * i <= num; i++)
+    {
+        if(num%i == 0) return false;
+    }
+    return true;
+}
 
 int main()
 {
+    ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
     cin >> _N;
-    _nums.push_back({n:2,sum_n:2}); // num, sum
-    while(true)
+    // cout << "---\n"; // TEST
+    for(int n_idx = 1; n_idx <= _N; n_idx++)
     {
-        cout << _nums[_nums.size()-1].n << " " << _nums[_nums.size()-1].sum_n << "\n"; // TEST
-        // 현재 소수의 합이 입력갑과 같거나 크다면 루프탈출.
-        if(_nums[_nums.size()-1].sum_n >= _N) break;
-        // 아니라면 소수 만들어서 다음 합 구하기.
-        bool is_make_num = false;
-        num_t n_num = {_nums[_nums.size()-1].n,0};
-        while(!is_make_num)
+        if(is_snum(n_idx))
         {
-            n_num.n++;
-            for(int n_cnt = 0; n_cnt < _nums.size(); n_cnt++)
-            {
-                cout << "... " << n_num.n << "     cnt: " << n_cnt << "\n"; // TEST
-                if(n_num.n % _nums[n_cnt].n != 0)
-                {
-                    cout << "(!) " << n_num.n << " old_sum: " << _nums[_nums.size()-1].sum_n << "\n";
-                    n_num.sum_n = n_num.n + _nums[_nums.size()-1].sum_n;
-                    _nums.push_back(n_num);
-                    is_make_num = true;
-                    break;
-                }
-            }
+            // cout << n_idx << ", "; // TEST
+            _snums.push_back(n_idx);
         }
     }
-    if(_nums[_nums.size()-1].sum_n == _N)
-        cout << _nums.size();
-    else
-        cout << 0;
+    // cout << "\n---\n"; // TEST
+    for(int start = 0; start < _snums.size(); start++)
+    {
+        int sum = 0;
+        int next = start;
+        while(next < _snums.size() && sum < _N)
+        {
+            sum += _snums[next];
+            next+=1;
+        }
+        if(sum == _N)
+        {
+            _ret_cnt++;
+        }
+    }
+    cout << _ret_cnt;
     return 0;
 }
