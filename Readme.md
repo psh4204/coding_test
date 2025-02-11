@@ -10,3 +10,6 @@ notepad for codingtest
   - period: 2024.03.31 ~ 2024.04.14
 - `10WCT`: [Let's study codingtest while 10weeks](https://www.inflearn.com/course/10%EC%A3%BC%EC%99%84%EC%84%B1-%EC%BD%94%EB%94%A9%ED%85%8C%EC%8A%A4%ED%8A%B8-%ED%81%B0%EB%8F%8C/dashboard)
   - period: 2024.07.24 ~
+
+## Rank
+- [![Solved.ac Profile](http://mazassumnida.wtf/api/v2/generate_badge?boj=sihwan2222)](https://solved.ac/sihwan2222/)
