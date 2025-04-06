@@ -19,14 +19,20 @@ N은 홀수
 - 범위는 max - min
 - 중앙값, 최빈값이 문제네
     - 중앙값은 흠..
-    - 최빈값은 hash map
+    - 최빈값은 hash map . 근데 동일한 최빈값이 있다면 두번째로 작은거로 출력
     - 최빈값을 구하면서, 중앙값을 구해보자
-    - 최빈값을 찾으며 값 삭제, 그러면서 N의 절반의 카운트값의 이하인 value가 중앙값
+    - 최빈값을 찾으며, N의 절반의 카운트값의 이하인 value가 중앙값
 */
 #include <bits/stdc++.h>
+#define MAX 987654321
+#define MIN -987654321
 using namespace std;
 typedef long long ll;
-int g_N, g_cnt, g_min = 987654321, g_max = -987654321, g_input, g_mid;
+int g_N, g_cnt, g_input,        \
+    g_min = MAX, g_max = MIN,   \
+    g_midCnt, g_midNum,         \
+    g_mostCnt; // 최빈값 중 두번째로 작은 값 체크용 카운트
+bool g_isIniteMid = false;
 ll g_sum;
 map<int, int> g_nums;
 pair<int, int> g_mostNum;
@@ -34,36 +40,54 @@ pair<int, int> g_mostNum;
 int main()
 {
     cin >> g_N;
-    g_mid = g_N/2;
+    g_midCnt = g_N/2 + 1; // N이 홀수이기때문에 중앙값은 항상 이렇게 해야한다
     for(int inCnt = 0; inCnt < g_N; inCnt++)
     {
         cin >> g_input;
         if(g_nums.empty() || g_nums.find(g_input) == g_nums.end())
-            g_nums.insert(g_input,1);
+            g_nums.insert({g_input,1});
         else
-        {
-            g_nums[g_input]++;
-        }
+        g_nums[g_input]++;
         g_min = min(g_min, g_input);
         g_max = max(g_max, g_input);
+        
         g_sum += g_input;
+        // cout << "g_sum" << g_sum << endl; // <<TEST>>
     }
     for(auto num : g_nums)
     {
         if(g_mostNum.second < num.second)
+        {
             g_mostNum = num;
-        
+            g_mostCnt = 1;
+        }
+        else if(g_mostNum.second == num.second && g_mostCnt < 2)
+        {
+            g_mostNum = num;
+            g_mostCnt++;
+        }
+        if(g_isIniteMid == false && g_midCnt - num.second <= 0)
+        {
+            g_isIniteMid = true;
+            g_midNum = num.first;
+        }
+        g_midCnt -= num.second;
     }
 
-    
-    // 산술평균
-    double avg = g_sum/g_N;
-    cout << round(avg) << "\n";
+    // 산술평균 <- 오답
+    long double avg = (long double)g_sum/g_N;
+    avg = round(avg);
+    // cout << g_sum << "/" << g_N << "= " << avg << endl; // <<TEST>>
+    cout << (int)avg << "\n";
 
-    // 최빈값
+    // 중앙값 
+    cout << g_midNum << "\n";
+
+    // 최빈값 <-오답
+    cout << g_mostNum.first << "\n";
+
+    // 범위
     cout << (g_max - g_min) << "\n";
-
     
-
     return 0;
-}
+} 
