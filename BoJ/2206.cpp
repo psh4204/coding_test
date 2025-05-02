@@ -32,7 +32,7 @@ struct Node_t{
 };
 vector<vector<int>> g_degree = {{-1,0}, {0,1}, {1,0}, {0,-1}};
 vector<vector<char>> g_map(1001, vector<char>(1001));
-vector<vector<pair<int,int>>> g_visited(1001, vector<pair<int,int>>(1001,{INT_MAX, 0})); 
+vector<vector<pair<int,int>>> g_visited(1001, vector<pair<int,int>>(1001,{INT_MAX, INT_MAX})); // 벽안부순거, 벽부순거
 
 int main()
 {
@@ -59,19 +59,6 @@ int main()
             next.weight +=1;
             if(next.y < 0 || next.x < 0 || next.y >= g_N || next.x >= g_M)
                 continue;
-            if(next.wellCnt == 0)
-            {
-                if(g_visited[next.y][next.x].second == 0 &&
-                    g_visited[next.y][next.x].first <= next.weight)
-                    continue;
-            }
-            else if(next.wellCnt == 1)
-            {
-                if(g_visited[next.y][next.x].first <= next.weight)
-                    continue;
-            }
-            // if(g_visited[next.y][next.x].first != INT_MAX)
-            //     continue;
             if(g_map[next.y][next.x] == '1')
             {
                 if(next.wellCnt == 1)
@@ -79,15 +66,25 @@ int main()
                 else
                     next.wellCnt =1;
             }
-            g_visited[next.y][next.x].first = next.weight;
-            g_visited[next.y][next.x].second = next.wellCnt;
-            nodeQ.push(next);
+            if(next.wellCnt == 0 && g_visited[next.y][next.x].first > next.weight)
+            {
+                g_visited[next.y][next.x].first = next.weight;
+                nodeQ.push(next);
+            }
+            else if(next.wellCnt == 1 && g_visited[next.y][next.x].second > next.weight)
+            {
+                g_visited[next.y][next.x].second = next.weight;
+                nodeQ.push(next);
+            }
         }
     }
-    if(g_visited[g_N-1][g_M-1].first == INT_MAX)
+    if(g_visited[g_N-1][g_M-1].first == INT_MAX && g_visited[g_N-1][g_M-1].second == INT_MAX)
         cout << -1;
     else
-        cout << g_visited[g_N-1][g_M-1].first;
+    {
+        int ans = min(g_visited[g_N-1][g_M-1].first, g_visited[g_N-1][g_M-1].second);
+        cout << ans;
+    }
 
     return 0;
 }
