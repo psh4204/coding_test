@@ -67,30 +67,30 @@ void LetsCleaning(Robot_t now)
     // 1. 현재 칸이 청소되지 않은 경우 청소 진행.
     if(g_map[now.y][now.x] == 0)
     {
-        g_map[now.y][now.x] = 1;
+        g_map[now.y][now.x] = 2;
         g_cleanCnt++;
     }
-    /***** TEST ******/
-    cout << "( " << g_cleanCnt <<" ) \n";
-    for(int y = 0; y < g_N; y++)
-    {
-        for(int x = 0; x < g_M; x++)
-            cout << g_map[y][x] << " ";
-        cout << "\n";
-    }
-    /***** TEST ******/
+    // /***** TEST ******/
+    // cout << "( " << g_cleanCnt <<" ) \n";
+    // for(int y = 0; y < g_N; y++)
+    // {
+    //     for(int x = 0; x < g_M; x++)
+    //         cout << g_map[y][x] << " ";
+    //     cout << "\n";
+    // }
+    // /***** TEST ******/
 
     // 2. 주변 4칸 중 청소할게 있다면(O)
     // - d 는 시계방향인데, 움직이는건 **반시계방향**으로 해야함.
     // - 반시계방향 회전 후 앞칸 청소 가능하면 1번으로 이동.
     for(int d = 0; d < 4; d++)
     {
-        // 해당 바라보는 방향으로 갈 수 있는지 체크
-        int preNextY = now.y + g_dy[next.d];
-        int preNextX = now.x + g_dx[next.x];
-        cout << " [" << preNextY <<  "," << preNextX <<"] "; /***** TEST ******/ 
         // 반시계방향 회전
         next.d = next.d - 1 >= 0 ? next.d - 1 : 3;
+        // 해당 바라보는 방향으로 갈 수 있는지 체크
+        int preNextY = now.y + g_dy[next.d];
+        int preNextX = now.x + g_dx[next.d];
+        // cout << " [" << preNextY <<  "," << preNextX <<"] "; /***** TEST ******/ 
         if(preNextY < 0 || preNextX < 0 || preNextY >= g_N || preNextX >= g_M)
             continue;
         // 청소 가능 여부 확인 후 청소
@@ -98,23 +98,23 @@ void LetsCleaning(Robot_t now)
         next.x = preNextX;
         if(g_map[next.y][next.x] == 0) // 청소 가능 (O)
         {
-            cout << "GotoFront " ;/***** TEST ******/
+            // cout << "GotoFront " ;/***** TEST ******/
             LetsCleaning(next);
             return;
         }
     }
 
     // 3. 주변 4칸 중 청소할게 없다면(X) **후진**후 1번으로 이동.
-    // - 후진 불가시(X X) 종료. (exit 1)
+    // - 후진 불가시(X X) 종료. (exit 0). 벽까지 포함.
     next.y = now.y - g_dy[now.d];
     next.x = now.x - g_dx[now.d];
-    if(next.y < 0 || next.x < 0 || next.y >= g_N || next.x >= g_M)
+    if(next.y < 0 || next.x < 0 || next.y >= g_N || next.x >= g_M || g_map[next.y][next.x] == 1)
     {
         // 후진불가판정
         cout << g_cleanCnt;
         exit(0);
     }
-    cout << "GotoBack" ;/***** TEST ******/
+    // cout << "GotoBack" ;/***** TEST ******/
     LetsCleaning(next); // 후진
 }
 
